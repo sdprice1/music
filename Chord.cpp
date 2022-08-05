@@ -73,6 +73,13 @@ Note Chord::root() const
 }
 
 //-------------------------------------------------------------------------------------------------------------
+std::string Chord::equation() const
+{
+	return mEquation ;
+}
+
+
+//-------------------------------------------------------------------------------------------------------------
 std::vector<Note> Chord::notes() const
 {
 	return mNotes ;
@@ -112,6 +119,45 @@ bool Chord::valid(const std::vector<Note> &notes) const
 	for (auto& [note, count] : seen)
 	{
 		if (count == 0)
+			return false ;
+	}
+
+	return true ;
+}
+
+//-------------------------------------------------------------------------------------------------------------
+bool Chord::operator ==(const Chord &rhs) const
+{
+	if (mEquation != rhs.mEquation)
+		return false ;
+
+	if (mNotes.size() != rhs.mNotes.size())
+		return false ;
+
+	for (unsigned i=0; i < mNotes.size(); ++i)
+	{
+		if (mNotes.at(i) != rhs.mNotes.at(i))
+			return false ;
+	}
+
+	return true ;
+}
+
+//-------------------------------------------------------------------------------------------------------------
+bool Chord::operator !=(const Chord &rhs) const
+{
+	return !operator==(rhs) ;
+}
+
+//-------------------------------------------------------------------------------------------------------------
+bool Chord::operator <(const Chord &rhs) const
+{
+	if (mNotes.size() >= rhs.mNotes.size())
+		return false ;
+
+	for (unsigned i=0; i < mNotes.size(); ++i)
+	{
+		if ( !(mNotes.at(i) < rhs.mNotes.at(i)) )
 			return false ;
 	}
 
@@ -165,3 +211,4 @@ void Chord::initNotes()
 		mNotes.push_back(note) ;
 	}
 }
+

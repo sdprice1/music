@@ -60,6 +60,11 @@ public:
 	Note(const Note& rhs) ;
 
 	/**
+	 * Is this a valid note?
+	 */
+	bool isValid() const ;
+
+	/**
 	 * Flatten
 	 */
 	void flat() ;

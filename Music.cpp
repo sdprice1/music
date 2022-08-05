@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <set>
 
 #include "Note.h"
 #include "Scale.h"
@@ -13,6 +14,7 @@
 #include "Chord.h"
 #include "MajorChord.h"
 #include "MinorChord.h"
+#include "Sus2Chord.h"
 #include "GuitarString.h"
 #include "GuitarChord.h"
 #include "Guitar.h"
@@ -264,16 +266,35 @@ int main()
 	}
 
 	{
-		MajorChord chord("D") ;
+//		MajorChord chord("D") ;
+		Sus2Chord chord("C") ;
 
 		Guitar guitar ;
 
-		std::vector<GuitarChord> chords(guitar.search(chord, 0)) ;
-		for (auto gc : chords)
+//		unsigned fret(5) ;
+		std::set<GuitarChord> sortedChords ;
+		unsigned count(0) ;
+		for (unsigned fret=0; fret < 12; fret++)
+		{
+//			std::cerr << "START " << fret << std::endl ;
+			std::vector<GuitarChord> chords(guitar.search(chord, fret)) ;
+			for (auto gc : chords)
+			{
+				++count ;
+//				std::cerr << "**" << count << "******" << std::endl ;
+//				gc.show() ;
+//				std::cerr << "********" << std::endl ;
+				sortedChords.insert(gc) ;
+			}
+		}
+
+//		std::cerr << "SORTED" << std::endl ;
+		for (auto gc : sortedChords)
 		{
 			gc.show() ;
 			std::cerr << "----" << std::endl ;
 		}
+
 	}
 
 

@@ -17,11 +17,20 @@
 // INCLUDE
 //=============================================================================================================
 #include <iomanip>
+#include <algorithm>
+
 #include "GuitarChord.h"
+
+//=============================================================================================================
+// CONSTANTS
+//=============================================================================================================
+const std::vector<unsigned> DOTTED_FRETS{1, 3, 5, 7, 9, 12, 15, 17, 19, 21} ;
 
 //=============================================================================================================
 // PUBLIC
 //=============================================================================================================
+unsigned GuitarChord::mDisplayFretSpan(0) ;
+
 
 //-------------------------------------------------------------------------------------------------------------
 GuitarChord::GuitarChord(const Chord &chord) :
@@ -89,31 +98,17 @@ bool GuitarChord::isValid() const
 {
 	std::vector<Note> notes ;
 	for (auto [string, note] : mNotes)
+	{
+		if (!note.isValid())
+			continue ;
 		notes.push_back(note) ;
+	}
 	return mChord.valid(notes) ;
 }
 
 //-------------------------------------------------------------------------------------------------------------
 void GuitarChord::show(std::ostream &os) const
 {
-//	for (auto string : std::vector<std::string>{"e", "B", "G", "D", "A", "E"})
-//	{
-//		os << string << ": " ;
-//		if (mFrets.at(string) < 0)
-//		{
-//			os << "x" ;
-//		}
-//		else
-//		{
-//			os << "[" << mFrets.at(string) << "] " ;
-//			auto note(mChord.search(mNotes.at(string))) ;
-//			if (note == mChord.root())
-//				os << "*" ;
-//			os << note.toString() ;
-//		}
-//		os << std::endl ;
-//	}
-
 #if 0
 
 	X     o   o
@@ -143,6 +138,19 @@ void GuitarChord::show(std::ostream &os) const
 	if (startFret > 0)
 		startFret-- ;
 
+	unsigned endFret(mMaxFret) ;
+	if (endFret < (startFret + mDisplayFretSpan))
+		endFret = startFret + mDisplayFretSpan ;
+
+	std::string notesStr ;
+	for (auto& note : mChord.notes())
+	{
+		if (!notesStr.empty())
+			notesStr += '-' ;
+		notesStr += note.toString() ;
+	}
+	os << mChord.name() << " (" << notesStr << ") [" << mChord.equation() << "]" << std::endl ;
+
 	// start
 	os << "    " ;
 	for (auto string : std::vector<std::string>{"E", "A", "D", "G", "B", "e"})
@@ -150,27 +158,31 @@ void GuitarChord::show(std::ostream &os) const
 		if (mFrets.at(string) == -1)
 			os << "   " ;
 		else
-			os << std::setw(3) << std::left << mNotes.at(string).toString() ;
+			os << std::setw(3) << std::left << mChord.search(mNotes.at(string)).toString() ;
 	}
 	os << std::endl ;
 
-	if (startFret != 0)
+	for (unsigned fret=startFret; fret <= endFret; ++fret)
 	{
-		os << "    +--------------+" << std::endl ;
-	}
-
-	for (unsigned fret=startFret; fret <= mMaxFret; ++fret)
-	{
-		char sep(':') ;
+		char vert(':') ;
 		if (fret == startFret)
-			sep = ' ' ;
+			vert = ' ' ;
 
-		// do strings
-		if (fret == (startFret + 1))
+//		if (fret == (startFret + 1))
+//			os << std::setw(2) << fret << "  " ;
+//		else
+//			os << "    " ;
+
+		// show dotted fret number if not the first displayed fret (which is used to show open
+		// strings and not used strings)
+		bool dotted(std::find(DOTTED_FRETS.begin(), DOTTED_FRETS.end(), fret) != DOTTED_FRETS.end()) ;
+		if ( (fret != startFret) && dotted )
 			os << std::setw(2) << fret << "  " ;
 		else
 			os << "    " ;
 
+
+		// do strings
 		for (auto string : std::vector<std::string>{"E", "A", "D", "G", "B", "e"})
 		{
 			if ( mFrets.at(string) == -1)
@@ -178,14 +190,14 @@ void GuitarChord::show(std::ostream &os) const
 				if (fret == startFret)
 					os << 'X' ;
 				else
-					os << sep ;
+					os << vert ;
 			}
 			else
 			{
 				if (fret == mFrets.at(string))
 					os << 'o' ;
 				else
-					os << sep ;
+					os << vert ;
 			}
 
 			os << "  " ;
@@ -207,4 +219,118 @@ void GuitarChord::show(std::ostream &os) const
 
 }
 
+//-------------------------------------------------------------------------------------------------------------
+bool GuitarChord::operator ==(const GuitarChord &rhs) const
+{
+
+//std::cerr << "-------------------------------" << std::endl ;
+//std::cerr << "GuitarChord ==" << std::endl ;
+//
+//std::cerr << "THIS" << std::endl ;
+//show() ;
+//std::cerr << "RHS" << std::endl ;
+//rhs.show() ;
+
+
+	if (mChord != rhs.mChord)
+	{
+//		std::cerr << "FALSE" << std::endl ;
+		return false ;
+	}
+
+	if (mMinFret != rhs.mMinFret)
+	{
+//		std::cerr << "FALSE" << std::endl ;
+		return false ;
+	}
+
+	if (mMaxFret != rhs.mMaxFret)
+	{
+//		std::cerr << "FALSE" << std::endl ;
+		return false ;
+	}
+
+	for (auto string : std::vector<std::string>{"E", "A", "D", "G", "B", "e"})
+	{
+		if (mFrets.at(string) != rhs.mFrets.at(string))
+		{
+//			std::cerr << "FALSE" << std::endl ;
+			return false ;
+		}
+
+		if (mNotes.at(string) != rhs.mNotes.at(string))
+		{
+//			std::cerr << "FALSE" << std::endl ;
+			return false ;
+		}
+	}
+
+//	std::cerr << "TRUE" << std::endl ;
+	return true ;
+}
+
+//-------------------------------------------------------------------------------------------------------------
+bool GuitarChord::operator !=(const GuitarChord &rhs) const
+{
+	return !operator==(rhs) ;
+}
+
+//-------------------------------------------------------------------------------------------------------------
+bool GuitarChord::operator <(const GuitarChord &rhs) const
+{
+//	std::cerr << "-------------------------------" << std::endl ;
+//	std::cerr << "GuitarChord <" << std::endl ;
+//
+//	std::cerr << "THIS" << std::endl ;
+//	show() ;
+//	std::cerr << "RHS" << std::endl ;
+//	rhs.show() ;
+
+	if (mMinFret < rhs.mMinFret)
+	{
+//		std::cerr << "TRUE" << std::endl ;
+		return true ;
+	}
+
+	if (mMinFret > rhs.mMinFret)
+	{
+//		std::cerr << "FALSE" << std::endl ;
+		return false ;
+	}
+
+	if (mMaxFret < rhs.mMaxFret)
+	{
+//		std::cerr << "TRUE" << std::endl ;
+		return true ;
+	}
+
+	if (mMaxFret > rhs.mMaxFret)
+	{
+//		std::cerr << "FALSE" << std::endl ;
+		return false ;
+	}
+
+	for (auto string : std::vector<std::string>{"E", "A", "D", "G", "B", "e"})
+	{
+		if (mFrets.at(string) < rhs.mFrets.at(string))
+		{
+//			std::cerr << "TRUE" << std::endl ;
+			return true ;
+
+		}
+	}
+
+//	std::cerr << "FALSE" << std::endl ;
+	return false ;
+}
+
+//=============================================================================================================
+// PUBLIC STATIC
+//=============================================================================================================
+
+//-------------------------------------------------------------------------------------------------------------
+void GuitarChord::setDisplayFretSpan(unsigned span)
+{
+	mDisplayFretSpan = span ;
+}
 

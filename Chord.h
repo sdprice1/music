@@ -43,6 +43,11 @@ public:
 	Note root() const ;
 
 	/**
+	 * Equation used to form the chord
+	 */
+	std::string equation() const ;
+
+	/**
 	 * Notes in the scale
 	 */
 	std::vector<Note> notes() const ;
@@ -58,6 +63,13 @@ public:
 	 * are present (and there are no notes in the list that are not part of the chord)
 	 */
 	bool valid(const std::vector<Note>& notes) const ;
+
+	/**
+	 * Comparison
+	 */
+	bool operator==(const Chord& rhs) const ;
+	bool operator!=(const Chord& rhs) const;
+	bool operator<(const Chord& rhs) const;
 
 private:
 	void initNotes() ;

@@ -156,10 +156,10 @@ void Note::sharp()
 //-------------------------------------------------------------------------------------------------------------
 bool Note::operator ==(const Note &rhs) const
 {
-	if (mVal == NO_NOTE)
-		return false ;
-	if (rhs.mVal == NO_NOTE)
-		return false ;
+//	if (mVal == NO_NOTE)
+//		return false ;
+//	if (rhs.mVal == NO_NOTE)
+//		return false ;
 
 	return mVal == rhs.mVal ;
 }
@@ -174,9 +174,15 @@ bool Note::operator !=(const Note &rhs) const
 bool Note::operator <(const Note &rhs) const
 {
 	if (mVal == NO_NOTE)
-		return false ;
+		return true ;
 	if (rhs.mVal == NO_NOTE)
 		return false ;
 
 	return mVal < rhs.mVal ;
+}
+
+//-------------------------------------------------------------------------------------------------------------
+bool Note::isValid() const
+{
+	return mVal != NO_NOTE ;
 }

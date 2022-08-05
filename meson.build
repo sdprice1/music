@@ -7,9 +7,7 @@ default_options : [
   'cpp_std=c++17'
 ])
 
-
-executable('Music', [
-	'Music.cpp', 
+lib_source = [
 	'Note.cpp', 
 	'Scale.cpp',
 	'MajorScale.cpp',
@@ -17,9 +15,21 @@ executable('Music', [
 	'Chord.cpp',
 	'MajorChord.cpp',
 	'MinorChord.cpp',
+	'Sus2Chord.cpp',
 	'GuitarString.cpp',
 	'GuitarChord.cpp',
 	'Guitar.cpp',
+]
+
+executable('Music', [
+	'Music.cpp', 
+	lib_source,
+]
+)
+
+executable('print-chords', [
+	'print-chords.cpp', 
+	lib_source,
 ]
 )
 

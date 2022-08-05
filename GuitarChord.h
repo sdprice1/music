@@ -36,6 +36,11 @@ public:
 	virtual ~GuitarChord() ;
 
 	/**
+	 * Set the minimum displayed frets
+	 */
+	static void setDisplayFretSpan(unsigned span) ;
+
+	/**
 	 * Add a fret definition to a string
 	 */
 	bool addFret(const std::string& stringName, unsigned fret, const Note& note) ;
@@ -55,7 +60,16 @@ public:
 	 */
 	void show(std::ostream& os = std::cout) const ;
 
+	/**
+	 * Comparison
+	 */
+	bool operator==(const GuitarChord& rhs) const ;
+	bool operator!=(const GuitarChord& rhs) const;
+	bool operator<(const GuitarChord& rhs) const;
+
 private:
+	static unsigned mDisplayFretSpan ;
+
 	Chord mChord ;
 
 	// -1 means string not used

@@ -37,6 +37,7 @@ struct guitarChordsearch {
 //=============================================================================================================
 // PUBLIC
 //=============================================================================================================
+//#define DEBUG_CHORD_SEARCH
 
 // I can only manage a chord of 4 frets width!
 const unsigned CHORD_SPAN(4) ;
@@ -50,6 +51,8 @@ Guitar::Guitar() :
 	mString_A("A", "A"),
 	mString_E("E", "E")
 {
+	// ensure we display the whole span
+	GuitarChord::setDisplayFretSpan(CHORD_SPAN) ;
 }
 
 //-------------------------------------------------------------------------------------------------------------
@@ -73,7 +76,18 @@ std::vector<GuitarChord> Guitar::search(const Chord &chord, unsigned startFret) 
 	{
 		std::vector<unsigned> frets(strings[string].search(startFret, startFret + CHORD_SPAN - 1, chord.notes())) ;
 		stringFrets.push_back(frets) ;
+
+#ifdef DEBUG_CHORD_SEARCH
+
+std::cerr << string << ": " ;
+for (auto fret : frets)
+	std::cerr << "[" << fret << "] " ;
+std::cerr << std::endl ;
+
+#endif
 	}
+
+
 
 	// need blocks of at least the same number of notes as the chord
 	// Any string that has no options is a 'do not play' and I don't want to create guitarChords with muted strings
@@ -126,12 +140,20 @@ std::vector<GuitarChord> Guitar::search(const Chord &chord, unsigned startFret) 
 	}
 
 
+#ifdef DEBUG_CHORD_SEARCH
+std::cerr << "SEARCHES" << std::endl ;
+for (auto& search : searches)
+{
+	std::cerr << " * start=" << search.startString << " number=" << search.numStrings << std::endl ;
+}
+#endif
+
 	// Can now build the guitar guitarChords and see if they are valid
 	std::vector<GuitarChord> guitarChords ;
 	guitarChords.push_back(GuitarChord(chord)) ; // start with an empty entry
 	for (auto& search : searches)
 	{
-		for (unsigned i=search.startString; i < search.numStrings; ++i)
+		for (unsigned i=search.startString; i < (search.startString + search.numStrings); ++i)
 		{
 			unsigned count(stringFrets[i].size()) ;
 
@@ -172,16 +194,6 @@ std::vector<GuitarChord> Guitar::search(const Chord &chord, unsigned startFret) 
 					gc.addFret(strings[i].name(), fret, strings[i].note(fret)) ;
 				}
 			}
-
-
-//			for (auto copy=0; copy < count; ++copy)
-//			{
-//				unsigned fret(stringFrets[i][copy]) ;
-//				for (auto& gc : guitarChords)
-//				{
-//					gc.addFret(strings[i].name(), fret, strings[i].note(fret)) ;
-//				}
-//			}
 		}
 	}
 
@@ -189,8 +201,18 @@ std::vector<GuitarChord> Guitar::search(const Chord &chord, unsigned startFret) 
 	std::vector<GuitarChord> validGuitarChords ;
 	for (auto& gc : guitarChords)
 	{
+#ifdef DEBUG_CHORD_SEARCH
+std::cerr << "Found chord:" << std::endl ;
+gc.show() ;
+std::cerr << "==" << std::endl ;
+#endif
+
 		if (!gc.isValid())
 			continue ;
+
+#ifdef DEBUG_CHORD_SEARCH
+std::cerr << "VALID" << std::endl ;
+#endif
 
 		validGuitarChords.push_back(gc) ;
 	}
