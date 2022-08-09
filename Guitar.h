@@ -38,6 +38,20 @@ public:
 	std::vector<GuitarChord> search(const Chord& chord, unsigned startFret) const ;
 
 private:
+	struct GuitarChordsearch {
+		GuitarChordsearch(unsigned start, unsigned num) :
+			startString(start),
+			numStrings(num)
+		{}
+
+		unsigned startString ;
+		unsigned numStrings ;
+	};
+
+	std::vector<GuitarChordsearch> getSearches(const Chord& chord,
+			const std::vector<std::vector<unsigned>>& stringFrets) const ;
+
+private:
 	GuitarString mString_e ;
 	GuitarString mString_B ;
 	GuitarString mString_G ;

@@ -17,6 +17,9 @@
 #define CHORD_H_
 
 #include <vector>
+#include <memory>
+#include <map>
+
 #include "Scale.h"
 
 
@@ -28,8 +31,15 @@
  */
 class Chord {
 public:
+
+	/**
+	 * Chord factory can create any type of chord known to it. Uses the major scale
+	 */
+	static std::shared_ptr<Chord> factory(const std::string chordType, const std::string& root) ;
+
 	Chord(const std::string& name, const Scale& scale, std::vector<unsigned> intervals) ;
 	Chord(const std::string& name, const Scale& scale, const std::string& equation) ;
+	Chord() ;
 	virtual ~Chord() ;
 
 	/**
@@ -65,6 +75,11 @@ public:
 	bool valid(const std::vector<Note>& notes) const ;
 
 	/**
+	 * Given a note, return the interval from the equation
+	 */
+	std::string equationNote(const Note& note) const ;
+
+	/**
 	 * Comparison
 	 */
 	bool operator==(const Chord& rhs) const ;
@@ -78,6 +93,7 @@ private:
 	std::string mName ;
 	Scale mScale ;
 	std::string mEquation ;
+	std::map<Note, std::string> mEquationNotes ;
 	std::vector<Note> mNotes ;
 } ;
 

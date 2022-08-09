@@ -20,24 +20,11 @@
 #include "Guitar.h"
 
 
-//=============================================================================================================
-// LOCAL
-//=============================================================================================================
-struct guitarChordsearch {
-	guitarChordsearch(unsigned start, unsigned num) :
-		startString(start),
-		numStrings(num)
-	{}
-
-	unsigned startString ;
-	unsigned numStrings ;
-};
-
 
 //=============================================================================================================
 // PUBLIC
 //=============================================================================================================
-//#define DEBUG_CHORD_SEARCH
+#define DEBUG_CHORD_SEARCH
 
 // I can only manage a chord of 4 frets width!
 const unsigned CHORD_SPAN(4) ;
@@ -87,66 +74,8 @@ std::cerr << std::endl ;
 #endif
 	}
 
-
-
-	// need blocks of at least the same number of notes as the chord
-	// Any string that has no options is a 'do not play' and I don't want to create guitarChords with muted strings
-	unsigned numNotes(chord.notes().size()) ;
-
-	std::vector<guitarChordsearch> searches ;
-	int currentStart(-1) ;
-	unsigned currentCount(0) ;
-	for (unsigned i=0; i < 6; ++i)
-	{
-		unsigned count(stringFrets[i].size()) ;
-		if (count > 0)
-		{
-			// add to current or start
-			if (currentStart == -1)
-			{
-				currentStart = i ;
-				currentCount = 1 ;
-			}
-			else
-			{
-				++currentCount ;
-			}
-		}
-		else
-		{
-			if (currentStart != -1)
-			{
-				if (currentCount >= numNotes)
-				{
-					// save
-					guitarChordsearch search(currentStart, currentCount) ;
-					searches.push_back(search) ;
-				}
-
-				currentStart = -1 ;
-				currentCount = 0 ;
-			}
-		}
-	}
-
-	if (currentStart != -1)
-	{
-		if (currentCount >= numNotes)
-		{
-			// save
-			guitarChordsearch search(currentStart, currentCount) ;
-			searches.push_back(search) ;
-		}
-	}
-
-
-#ifdef DEBUG_CHORD_SEARCH
-std::cerr << "SEARCHES" << std::endl ;
-for (auto& search : searches)
-{
-	std::cerr << " * start=" << search.startString << " number=" << search.numStrings << std::endl ;
-}
-#endif
+	// get range of strings to search over
+	std::vector<GuitarChordsearch> searches(getSearches(chord, stringFrets)) ;
 
 	// Can now build the guitar guitarChords and see if they are valid
 	std::vector<GuitarChord> guitarChords ;
@@ -165,7 +94,7 @@ for (auto& search : searches)
 			if (count > 1)
 			{
 				std::vector<GuitarChord> base(guitarChords) ;
-				for (auto copy=0; copy < count; ++copy)
+				for (unsigned copy=0; copy < count; ++copy)
 				{
 					unsigned fret(stringFrets[i][copy]) ;
 					if (copy == 0)
@@ -197,6 +126,11 @@ for (auto& search : searches)
 		}
 	}
 
+#ifdef DEBUG_CHORD_SEARCH
+std::cerr << "Found " << guitarChords.size() << " chords" << std::endl ;
+#endif
+
+
 	// now only report the valid ones
 	std::vector<GuitarChord> validGuitarChords ;
 	for (auto& gc : guitarChords)
@@ -208,15 +142,117 @@ std::cerr << "==" << std::endl ;
 #endif
 
 		if (!gc.isValid())
+		{
+#ifdef DEBUG_CHORD_SEARCH
+std::cerr << "** INVALID **" << std::endl ;
+#endif
 			continue ;
+		}
 
 #ifdef DEBUG_CHORD_SEARCH
 std::cerr << "VALID" << std::endl ;
 #endif
 
+		// save
+		validGuitarChords.push_back(gc) ;
+
+		// check for inversion
+		if (!gc.isInverted())
+			continue ;
+
+		gc.removeInversion() ;
+		if (!gc.isValid())
+			continue ;
+
+		// save
 		validGuitarChords.push_back(gc) ;
 	}
 
+#ifdef DEBUG_CHORD_SEARCH
+std::cerr << "Valid " << validGuitarChords.size() << " chords" << std::endl ;
+#endif
+
+
 	return validGuitarChords ;
 
+}
+
+//=============================================================================================================
+// PRIVATE
+//=============================================================================================================
+
+//-------------------------------------------------------------------------------------------------------------
+std::vector<Guitar::GuitarChordsearch> Guitar::getSearches(const Chord& chord,
+		const std::vector<std::vector<unsigned>>& stringFrets) const
+{
+	std::vector<GuitarChordsearch> searches ;
+
+	// TODO: Add search criteria
+	{
+	GuitarChordsearch search(0, 6) ;
+	searches.push_back(search) ;
+	return searches ;
+	}
+
+
+
+	// need blocks of at least the same number of notes as the chord
+	// Any string that has no options is a 'do not play' and I don't want to create guitarChords with muted strings
+	unsigned numNotes(chord.notes().size()) ;
+
+	int currentStart(-1) ;
+	unsigned currentCount(0) ;
+	for (unsigned i=0; i < 6; ++i)
+	{
+		unsigned count(stringFrets[i].size()) ;
+		if (count > 0)
+		{
+			// add to current or start
+			if (currentStart == -1)
+			{
+				currentStart = i ;
+				currentCount = 1 ;
+			}
+			else
+			{
+				++currentCount ;
+			}
+		}
+		else
+		{
+			if (currentStart != -1)
+			{
+				if (currentCount >= numNotes)
+				{
+					// save
+					GuitarChordsearch search(currentStart, currentCount) ;
+					searches.push_back(search) ;
+				}
+
+				currentStart = -1 ;
+				currentCount = 0 ;
+			}
+		}
+	}
+
+	if (currentStart != -1)
+	{
+		if (currentCount >= numNotes)
+		{
+			// save
+			GuitarChordsearch search(currentStart, currentCount) ;
+			searches.push_back(search) ;
+		}
+	}
+
+
+#ifdef DEBUG_CHORD_SEARCH
+std::cerr << "SEARCHES" << std::endl ;
+for (auto& search : searches)
+{
+	std::cerr << " * start=" << search.startString << " number=" << search.numStrings << std::endl ;
+}
+#endif
+
+	return searches ;
 }

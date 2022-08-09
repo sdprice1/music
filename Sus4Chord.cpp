@@ -2,7 +2,7 @@
  * Copyright (c) 2022 Steve Price
  * All Rights Reserved
  *
- * \file      Scale.cpp
+ * \file      Sus4Chord.cpp
  * \brief     <one-line description of file>
  *
  * \date      2 Aug 2022
@@ -16,67 +16,28 @@
 //=============================================================================================================
 // INCLUDE
 //=============================================================================================================
-#include "StringUtils.hpp"
-#include "Scale.h"
+#include "MajorScale.h"
+#include "Sus4Chord.h"
 
 //=============================================================================================================
 // PUBLIC
 //=============================================================================================================
 
 //-------------------------------------------------------------------------------------------------------------
-Scale::Scale(const std::string &name, const Note& root, const std::string &intervals) :
-	mName(name),
-	mRootNote(root),
-	mIntervals(StringUtils::toUpper(intervals)),
-	mNotes()
-{
-	mNotes.push_back(mRootNote) ;
-	Note note(mRootNote) ;
-
-	for (auto cc : mIntervals)
-	{
-		if (cc == 'W')
-		{
-			note.sharp() ;
-			note.sharp() ;
-		}
-		if (cc == 'H')
-		{
-			note.sharp() ;
-		}
-
-		// 'turn' note into flat
-		note.sharp() ;
-		note.flat() ;
-
-		mNotes.push_back(note) ;
-	}
-
-	// repeat
-	mNotes.insert(mNotes.end(), mNotes.begin(), mNotes.end()) ;
-}
-
-//-------------------------------------------------------------------------------------------------------------
-Scale::~Scale()
+Sus4Chord::Sus4Chord(const Note& root) :
+	Chord(root.toString() + "sus4", MajorScale(root), "1-4-5")
 {
 }
 
 //-------------------------------------------------------------------------------------------------------------
-std::string Scale::name() const
+Sus4Chord::Sus4Chord(const std::string &root) :
+	Sus4Chord(Note(root))
+
 {
-	return mName ;
 }
 
 //-------------------------------------------------------------------------------------------------------------
-Note Scale::root() const
+Sus4Chord::~Sus4Chord()
 {
-	return mRootNote ;
 }
-
-//-------------------------------------------------------------------------------------------------------------
-std::vector<Note> Scale::notes() const
-{
-	return mNotes ;
-}
-
 

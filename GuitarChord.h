@@ -36,6 +36,11 @@ public:
 	virtual ~GuitarChord() ;
 
 	/**
+	 * Copy
+	 */
+	GuitarChord(const GuitarChord& rhs) ;
+
+	/**
 	 * Set the minimum displayed frets
 	 */
 	static void setDisplayFretSpan(unsigned span) ;
@@ -56,6 +61,16 @@ public:
 	bool isValid() const ;
 
 	/**
+	 * Is this an inverted chord (i.e. root not on lowest sounding string)
+	 */
+	bool isInverted() const ;
+
+	/**
+	 * If the chord is inverted, remove any lower sounding strings so root is lowest
+	 */
+	void removeInversion() ;
+
+	/**
 	 * Display as text
 	 */
 	void show(std::ostream& os = std::cout) const ;
@@ -66,6 +81,9 @@ public:
 	bool operator==(const GuitarChord& rhs) const ;
 	bool operator!=(const GuitarChord& rhs) const;
 	bool operator<(const GuitarChord& rhs) const;
+
+private:
+	void updateMaxMin(unsigned fret) ;
 
 private:
 	static unsigned mDisplayFretSpan ;

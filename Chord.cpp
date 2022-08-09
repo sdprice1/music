@@ -12,6 +12,7 @@
  *
  */
 
+#include <iostream>
 
 //=============================================================================================================
 // INCLUDE
@@ -31,8 +32,8 @@ Chord::Chord(const std::string &name, const Scale &scale, std::vector<unsigned> 
 	mName(name),
 	mScale(scale),
 	mEquation(),
+	mEquationNotes(),
 	mNotes()
-
 {
 	for (auto itvl : intervals)
 	{
@@ -49,6 +50,7 @@ Chord::Chord(const std::string &name, const Scale &scale, const std::string &equ
 	mName(name),
 	mScale(scale),
 	mEquation(equation),
+	mEquationNotes(),
 	mNotes()
 {
 	initNotes() ;
@@ -126,6 +128,15 @@ bool Chord::valid(const std::vector<Note> &notes) const
 }
 
 //-------------------------------------------------------------------------------------------------------------
+std::string Chord::equationNote(const Note &note) const
+{
+	if (mEquationNotes.find(note) == mEquationNotes.end())
+		return "" ;
+
+	return mEquationNotes.at(note) ;
+}
+
+//-------------------------------------------------------------------------------------------------------------
 bool Chord::operator ==(const Chord &rhs) const
 {
 	if (mEquation != rhs.mEquation)
@@ -188,6 +199,8 @@ void Chord::initNotes()
 		bool ok ;
 		unsigned interval(StringUtils::extractUnsigned(part, ok)) ;
 
+//std::cerr << part << " " << interval << " flats=" << flats << " sharps=" << sharps << std::endl ;
+
 		if (!ok || (interval == 0))
 			continue ;
 
@@ -208,7 +221,12 @@ void Chord::initNotes()
 			note.flat() ;
 		}
 
+//std::cerr << "ADD " << note.toString() << std::endl ;
 		mNotes.push_back(note) ;
+
+		if (part == "1")
+			part = "R" ;
+		mEquationNotes[note] = part ;
 	}
 }
 
