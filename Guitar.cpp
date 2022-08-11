@@ -16,15 +16,12 @@
 //=============================================================================================================
 // INCLUDE
 //=============================================================================================================
-
 #include "Guitar.h"
-
-
 
 //=============================================================================================================
 // PUBLIC
 //=============================================================================================================
-#define DEBUG_CHORD_SEARCH
+//#define DEBUG_CHORD_SEARCH
 
 // I can only manage a chord of 4 frets width!
 const unsigned CHORD_SPAN(4) ;
@@ -48,7 +45,7 @@ Guitar::~Guitar()
 }
 
 //-------------------------------------------------------------------------------------------------------------
-std::vector<GuitarChord> Guitar::search(const Chord &chord, unsigned startFret) const
+std::vector<GuitarChord> Guitar::search(const Chord &chord, unsigned startFret, const GuitarSearchCriteria& criteria) const
 {
 	std::vector<GuitarString> strings ;
 	strings.push_back(mString_E) ;
@@ -75,7 +72,7 @@ std::cerr << std::endl ;
 	}
 
 	// get range of strings to search over
-	std::vector<GuitarChordsearch> searches(getSearches(chord, stringFrets)) ;
+	std::vector<GuitarChordsearch> searches(getSearches(chord, stringFrets, criteria)) ;
 
 	// Can now build the guitar guitarChords and see if they are valid
 	std::vector<GuitarChord> guitarChords ;
@@ -154,7 +151,21 @@ std::cerr << "VALID" << std::endl ;
 #endif
 
 		// save
-		validGuitarChords.push_back(gc) ;
+		if (!criteria.onlyFindTriads)
+		{
+			if (!gc.isInverted() || (gc.isInverted() && criteria.allowInversions))
+				validGuitarChords.push_back(gc) ;
+		}
+
+		// are we finding triads?
+		if (criteria.findTriads || criteria.onlyFindTriads)
+		{
+			auto triads(gc.triads()) ;
+			validGuitarChords.insert(validGuitarChords.end(), triads.begin(), triads.end()) ;
+		}
+
+		if (criteria.onlyFindTriads)
+			continue ;
 
 		// check for inversion
 		if (!gc.isInverted())
@@ -183,18 +194,17 @@ std::cerr << "Valid " << validGuitarChords.size() << " chords" << std::endl ;
 
 //-------------------------------------------------------------------------------------------------------------
 std::vector<Guitar::GuitarChordsearch> Guitar::getSearches(const Chord& chord,
-		const std::vector<std::vector<unsigned>>& stringFrets) const
+		const std::vector<std::vector<unsigned>>& stringFrets,
+		const GuitarSearchCriteria& criteria) const
 {
 	std::vector<GuitarChordsearch> searches ;
 
-	// TODO: Add search criteria
+	if (criteria.allowMutedStringsInChord)
 	{
-	GuitarChordsearch search(0, 6) ;
-	searches.push_back(search) ;
-	return searches ;
+		GuitarChordsearch search(0, 6) ;
+		searches.push_back(search) ;
+		return searches ;
 	}
-
-
 
 	// need blocks of at least the same number of notes as the chord
 	// Any string that has no options is a 'do not play' and I don't want to create guitarChords with muted strings

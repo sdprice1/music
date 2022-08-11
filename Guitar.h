@@ -18,6 +18,7 @@
 
 #include <vector>
 
+#include "GuitarSearchCriteria.h"
 #include "GuitarString.h"
 #include "GuitarChord.h"
 
@@ -35,7 +36,8 @@ public:
 	/**
 	 * Look for ways to play the chord in this range of frets. If any are found, returns the list of chords for guitar
 	 */
-	std::vector<GuitarChord> search(const Chord& chord, unsigned startFret) const ;
+	std::vector<GuitarChord> search(const Chord& chord, unsigned startFret,
+			const GuitarSearchCriteria& criteria = GuitarSearchCriteria()) const ;
 
 private:
 	struct GuitarChordsearch {
@@ -49,7 +51,8 @@ private:
 	};
 
 	std::vector<GuitarChordsearch> getSearches(const Chord& chord,
-			const std::vector<std::vector<unsigned>>& stringFrets) const ;
+			const std::vector<std::vector<unsigned>>& stringFrets,
+			const GuitarSearchCriteria& criteria) const ;
 
 private:
 	GuitarString mString_e ;

@@ -73,7 +73,18 @@ public:
 	/**
 	 * Display as text
 	 */
-	void show(std::ostream& os = std::cout) const ;
+	void show(std::ostream& os = std::cout, bool showTitle = true) const ;
+
+	/**
+	 * Get the chord title string
+	 */
+	std::string title() const ;
+
+	/**
+	 * Taking this chord as the starting point, find any triads - i.e. just the 3 (or more) notes
+	 * of the chord with no multiple notes
+	 */
+	std::vector<GuitarChord> triads() const ;
 
 	/**
 	 * Comparison
@@ -83,6 +94,7 @@ public:
 	bool operator<(const GuitarChord& rhs) const;
 
 private:
+	void updateMaxMin() ;
 	void updateMaxMin(unsigned fret) ;
 
 private:

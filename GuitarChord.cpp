@@ -26,6 +26,7 @@
 //=============================================================================================================
 const std::vector<unsigned> DOTTED_FRETS{1, 3, 5, 7, 9, 12, 15, 17, 19, 21} ;
 const int UNUSED_FRET(-1) ;
+const std::vector<std::string> STRINGS{"E", "A", "D", "G", "B", "e"} ;
 
 //=============================================================================================================
 // PUBLIC
@@ -41,7 +42,7 @@ GuitarChord::GuitarChord(const Chord &chord) :
 	mMinFret(UNUSED_FRET),
 	mMaxFret(UNUSED_FRET)
 {
-	for (auto string : std::vector<std::string>{"E", "A", "D", "G", "B", "e"})
+	for (auto string : STRINGS)
 	{
 		mFrets[string] = UNUSED_FRET ;
 		mNotes[string] = Note() ;
@@ -69,7 +70,7 @@ bool GuitarChord::isInverted() const
 	if (mNotes.empty())
 		return false ;
 
-	for (auto string : std::vector<std::string>{"E", "A", "D", "G", "B", "e"})
+	for (auto string : STRINGS)
 	{
 		// find first used string
 		if (mFrets.at(string) == UNUSED_FRET)
@@ -88,7 +89,7 @@ void GuitarChord::removeInversion()
 		return ;
 
 	// find first string with root note
-	for (auto string : std::vector<std::string>{"E", "A", "D", "G", "B", "e"})
+	for (auto string : STRINGS)
 	{
 		if (mFrets.at(string) == UNUSED_FRET)
 			continue ;
@@ -102,16 +103,7 @@ void GuitarChord::removeInversion()
 	}
 
 	// need to update max/min
-	mMinFret = UNUSED_FRET ;
-	mMaxFret = UNUSED_FRET ;
-	for (auto string : std::vector<std::string>{"E", "A", "D", "G", "B", "e"})
-	{
-		if (mFrets.at(string) == UNUSED_FRET)
-			continue ;
-
-		updateMaxMin(mFrets.at(string)) ;
-	}
-
+	updateMaxMin() ;
 }
 
 
@@ -152,7 +144,24 @@ bool GuitarChord::isValid() const
 }
 
 //-------------------------------------------------------------------------------------------------------------
-void GuitarChord::show(std::ostream &os) const
+std::string GuitarChord::title() const
+{
+	std::string notesStr ;
+	for (auto& note : mChord.notes())
+	{
+		if (!notesStr.empty())
+			notesStr += '-' ;
+		notesStr += note.toString() ;
+	}
+
+	std::string titleStr = mChord.name() + " (" + notesStr + ") [" +
+			mChord.equation() + "]" ;
+
+	return titleStr ;
+}
+
+//-------------------------------------------------------------------------------------------------------------
+void GuitarChord::show(std::ostream &os, bool showTitle) const
 {
 #if 0
 
@@ -187,18 +196,12 @@ void GuitarChord::show(std::ostream &os) const
 	if (endFret < (startFret + mDisplayFretSpan))
 		endFret = startFret + mDisplayFretSpan ;
 
-	std::string notesStr ;
-	for (auto& note : mChord.notes())
-	{
-		if (!notesStr.empty())
-			notesStr += '-' ;
-		notesStr += note.toString() ;
-	}
-	os << mChord.name() << " (" << notesStr << ") [" << mChord.equation() << "]" << std::endl ;
+	if (showTitle)
+		os << title() << std::endl ;
 
 	// start
 	os << "    " ;
-	for (auto string : std::vector<std::string>{"E", "A", "D", "G", "B", "e"})
+	for (auto string : STRINGS)
 	{
 		if (mFrets.at(string) == UNUSED_FRET)
 			os << "   " ;
@@ -222,13 +225,13 @@ void GuitarChord::show(std::ostream &os) const
 		// strings and not used strings)
 		bool dotted(std::find(DOTTED_FRETS.begin(), DOTTED_FRETS.end(), fret) != DOTTED_FRETS.end()) ;
 		if ( (fret != startFret) && dotted )
-			os << std::setw(2) << fret << "  " ;
+			os  << " " << std::setw(2) << std::right << fret << " " ;
 		else
 			os << "    " ;
 
 
 		// do strings
-		for (auto string : std::vector<std::string>{"E", "A", "D", "G", "B", "e"})
+		for (auto string : STRINGS)
 		{
 			if ( mFrets.at(string) == UNUSED_FRET)
 			{
@@ -254,17 +257,17 @@ void GuitarChord::show(std::ostream &os) const
 		// end of this fret
 		if (fret == 0)
 		{
-			os << "    ================" << std::endl ;
+			os << "    ================  " << std::endl ;
 		}
 		else
 		{
-			os << "    +--------------+" << std::endl ;
+			os << "    +--------------+  " << std::endl ;
 		}
 	}
 
 	// show which part of the equation eachj of the notes is
 	os << "    " ;
-	for (auto string : std::vector<std::string>{"E", "A", "D", "G", "B", "e"})
+	for (auto string : STRINGS)
 	{
 		if (mFrets.at(string) == UNUSED_FRET)
 			os << "   " ;
@@ -306,7 +309,7 @@ bool GuitarChord::operator ==(const GuitarChord &rhs) const
 		return false ;
 	}
 
-	for (auto string : std::vector<std::string>{"E", "A", "D", "G", "B", "e"})
+	for (auto string : STRINGS)
 	{
 		if (mFrets.at(string) != rhs.mFrets.at(string))
 		{
@@ -366,7 +369,7 @@ bool GuitarChord::operator <(const GuitarChord &rhs) const
 		return false ;
 	}
 
-	for (auto string : std::vector<std::string>{"E", "A", "D", "G", "B", "e"})
+	for (auto string : STRINGS)
 	{
 		if (mFrets.at(string) < rhs.mFrets.at(string))
 		{
@@ -378,6 +381,49 @@ bool GuitarChord::operator <(const GuitarChord &rhs) const
 
 //	std::cerr << "FALSE" << std::endl ;
 	return false ;
+}
+
+//-------------------------------------------------------------------------------------------------------------
+std::vector<GuitarChord> GuitarChord::triads() const
+{
+	std::vector<GuitarChord> triadChords ;
+	unsigned chordSize(mChord.notes().size()) ;
+
+	// starting at each string, create a chord using the same number of strings as the number
+	// of notes in the chord. If this is then a valid chord (i.e. has all the chord notes)
+	// then this will contain each note of the chord once
+	for (unsigned stringnum=0; stringnum < (6 - chordSize); ++stringnum)
+	{
+		GuitarChord triad(*this) ;
+
+		// clear strings before this one
+		for (unsigned i=0; i < stringnum; ++i)
+		{
+			auto string(STRINGS.at(i)) ;
+			triad.mFrets[string] = UNUSED_FRET ;
+			triad.mNotes[string] = Note() ;
+		}
+
+		// clear strings after the last note
+		for (unsigned i=(stringnum+chordSize); i < 6; ++i)
+		{
+			auto string(STRINGS.at(i)) ;
+			triad.mFrets[string] = UNUSED_FRET ;
+			triad.mNotes[string] = Note() ;
+		}
+
+		if (!triad.isValid())
+			continue ;
+
+		// skip if we've just found the same chord!
+		if (triad == *this)
+			continue ;
+
+		triad.updateMaxMin() ;
+		triadChords.push_back(triad) ;
+	}
+
+	return triadChords ;
 }
 
 //=============================================================================================================
@@ -393,6 +439,20 @@ void GuitarChord::setDisplayFretSpan(unsigned span)
 //=============================================================================================================
 // PRIVATE
 //=============================================================================================================
+
+//-------------------------------------------------------------------------------------------------------------
+void GuitarChord::updateMaxMin()
+{
+	mMinFret = UNUSED_FRET ;
+	mMaxFret = UNUSED_FRET ;
+	for (auto string : STRINGS)
+	{
+		if (mFrets.at(string) == UNUSED_FRET)
+			continue ;
+
+		updateMaxMin(mFrets.at(string)) ;
+	}
+}
 
 //-------------------------------------------------------------------------------------------------------------
 void GuitarChord::updateMaxMin(unsigned fret)
@@ -417,3 +477,4 @@ void GuitarChord::updateMaxMin(unsigned fret)
 			mMaxFret = fret ;
 	}
 }
+
