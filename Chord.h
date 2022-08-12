@@ -37,6 +37,11 @@ public:
 	 */
 	static std::shared_ptr<Chord> factory(const std::string chordType, const std::string& root) ;
 
+	/**
+	 * Get the list of available chord types
+	 */
+	static std::vector<std::string> types() ;
+
 	Chord(const std::string& name, const Scale& scale, std::vector<unsigned> intervals) ;
 	Chord(const std::string& name, const Scale& scale, const std::string& equation) ;
 	Chord() ;

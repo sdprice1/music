@@ -42,6 +42,9 @@ namespace {
 		bool wholeNeck ;
 		bool triadsOnly ;
 		unsigned debug ;
+		bool listTypes ;
+		bool pageBreaks ;
+		std::string type ;
 		std::vector<std::string> args ;
 	};
 
@@ -58,7 +61,10 @@ namespace {
 		std::cout << "  -h, --help                 Show this help " << std::endl ;
 		std::cout << "  -d, --debug <level>        Set debug level " << std::endl ;
 		std::cout << "  -w, --whole-neck           Search across the whole neck" << std::endl ;
-		std::cout << "  -t, --only-triads          Only find triads" << std::endl ;
+		std::cout << "  -T, --only-triads          Only find triads" << std::endl ;
+		std::cout << "  -t, --type <type>          Select chord type (default: Major)" << std::endl ;
+		std::cout << "  -l, --list-types           List available chord types" << std::endl ;
+		std::cout << "  -P, --page-breaks          Add page breaks for printing" << std::endl ;
 		std::cout << std::endl ;
 	}
 
@@ -67,19 +73,25 @@ namespace {
 		options.wholeNeck = false ;
 		options.debug = 0 ;
 		options.triadsOnly = false ;
+		options.listTypes = false ;
+		options.pageBreaks = false ;
+		options.type = "Major" ;
 		options.args.clear() ;
 
 		struct option long_options[] = {
 			{"help", OPT_NO_ARGS, nullptr, 'h'},
 			{"whole-neck", OPT_NO_ARGS, nullptr, 'w'},
-			{"only-triads", OPT_NO_ARGS, nullptr, 't'},
+			{"only-triads", OPT_NO_ARGS, nullptr, 'T'},
+			{"list-types", OPT_NO_ARGS, nullptr, 'l'},
+			{"page-breaks", OPT_NO_ARGS, nullptr, 'P'},
+			{"type", OPT_REQUIRED, nullptr, 't'},
 			{0, 0, 0, 0}
 		};
 		int option_index = 0;
 		optind = 0 ;
 
 		int c ;
-	    while ((c = getopt_long(argc, argv, "hd:wt", long_options, &option_index)) != -1)
+	    while ((c = getopt_long(argc, argv, "hd:wTlPt:", long_options, &option_index)) != -1)
 	    {
 	        switch (c)
 	        {
@@ -96,8 +108,20 @@ namespace {
 	        	options.wholeNeck = true ;
 	        	break ;
 
-	        case 't':
+	        case 'T':
 	        	options.triadsOnly = true ;
+	        	break ;
+
+	        case 'l':
+	        	options.listTypes = true ;
+	        	break ;
+
+	        case 'P':
+	        	options.pageBreaks = true ;
+	        	break ;
+
+	        case 't':
+	        	options.type = optarg ;
 	        	break ;
 	        }
 	    }
@@ -124,6 +148,16 @@ int main(int argc, char** argv)
     if (!getOptions(argc, argv, options))
     	return -1 ;
 
+    if (options.listTypes)
+    {
+    	std::vector<std::string> list(Chord::types()) ;
+    	std::cout << "Available chord types:" << std::endl ;
+    	for (auto& type : list)
+    		std::cout << type << std::endl ;
+    	return 0 ;
+    }
+
+
 	if (options.args.empty())
 	{
 		std::cerr << "Error: Must specify a note" << std::endl ;
@@ -131,11 +165,11 @@ int main(int argc, char** argv)
 	}
 	std::string noteName(options.args[0]) ;
 
-	std::string type("Major") ;
-	if (options.args.size() >= 2)
-	{
-		type = options.args[0] ;
-	}
+//	std::string type("Major") ;
+//	if (options.args.size() >= 2)
+//	{
+//		type = options.args[0] ;
+//	}
 
 	unsigned endFret(0) ;
 	if (options.wholeNeck)
@@ -145,10 +179,10 @@ int main(int argc, char** argv)
 	if (options.triadsOnly)
 		criteria.onlyFindTriads = true ;
 
-	std::shared_ptr<Chord> chord(Chord::factory(type, noteName)) ;
+	std::shared_ptr<Chord> chord(Chord::factory(options.type, noteName)) ;
 	if (!chord)
 	{
-		std::cerr << "ERROR: Unable to create " << type << " chord" << std::endl ;
+		std::cerr << "ERROR: Unable to create " << options.type << " chord" << std::endl ;
 		return -1 ;
 	}
 
@@ -171,6 +205,7 @@ int main(int argc, char** argv)
 	std::cout << title << std::endl << std::endl ;
 	std::vector<std::string> lines ;
 	unsigned chordCount(0) ;
+	unsigned chordLineCount(0) ;
 	for (auto gc : sortedChords)
 	{
 		std::stringstream ss ;
@@ -196,6 +231,16 @@ int main(int argc, char** argv)
 
 			chordCount = 0 ;
 			lines.clear() ;
+
+			++chordLineCount ;
+
+			if (chordLineCount >= 5)
+			{
+				std::cout << "\f" ;
+				std::cout << title << std::endl << std::endl ;
+
+				chordLineCount = 0 ;
+			}
 		}
 	}
 

@@ -17,6 +17,7 @@
 // INCLUDE
 //=============================================================================================================
 #include <map>
+#include <algorithm>
 
 #include "StringUtils.hpp"
 #include "MajorScale.h"
@@ -90,5 +91,21 @@ std::shared_ptr<Chord> Chord::factory(const std::string chordType, const std::st
 
 	std::string name(note.toString() + CHORDS.at(type).suffix) ;
 	return std::make_shared<Chord>(name, scale, CHORDS.at(type).equation) ;
+}
+
+//-------------------------------------------------------------------------------------------------------------
+std::vector<std::string> Chord::types()
+{
+	std::vector<std::string> list{"major", "minor", "dim"} ;
+
+	for (auto& [type, entry] : CHORDS)
+	{
+		if (std::find(list.begin(), list.end(), type) != list.end())
+			continue ;
+
+		list.push_back(type) ;
+	}
+
+	return list ;
 }
 
