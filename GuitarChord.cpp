@@ -278,6 +278,17 @@ void GuitarChord::show(std::ostream &os, bool showTitle) const
 
 }
 
+std::vector<int> GuitarChord::frets() const
+{
+	std::vector<int> list ;
+
+	for (auto string : STRINGS)
+	{
+		list.push_back(mFrets.at(string)) ;
+	}
+	return list ;
+}
+
 //-------------------------------------------------------------------------------------------------------------
 bool GuitarChord::operator ==(const GuitarChord &rhs) const
 {

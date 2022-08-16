@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<svg width="400px" height="400px" viewBox="0 0 400 400">
+<title>Chord example</title>
+<desc>Drawing example of different chords displayed as SVG</desc>
+
+<defs>
+
+<symbol id="sym-chart" style="stroke: black;"
+   preserveAspectRatio="xMidYMid slice" viewBox="0 0 160 200">
+    <desc>Guitar strings</desc>
+    
+    <line x1="0" y1="0" x2="150" y2="0"/>
+    <line x1="0" y1="0" x2="0" y2="199"/>
+    <line x1="30" y1="0" x2="30" y2="199"/>
+    <line x1="60" y1="0" x2="60" y2="199"/>
+    <line x1="90" y1="0" x2="90" y2="199"/>
+    <line x1="120" y1="0" x2="120" y2="199"/>
+    <line x1="150" y1="0" x2="150" y2="199"/>
+    
+    <line x1="0" y1="50" x2="150" y2="50"/>
+    <line x1="0" y1="100" x2="150" y2="100"/>
+    <line x1="0" y1="150" x2="150" y2="150"/>
+    
+    
+    <line x1="0" y1="199" x2="150" y2="199"/>
+    
+    
+</symbol>
+
+<symbol id="sym-chart-1" style="stroke: black;"
+   preserveAspectRatio="xMidYMid slice" viewBox="0 0 160 200">
+    <desc>Guitar strings at nut position</desc>
+    
+    <circle cx="75" cy="125" r="14" fill="none" />
+    
+    <line x1="0" y1="0" x2="150" y2="0" stroke-width="19"/>
+    
+	<use xlink:href="#sym-chart" x="0" y="0" width="160" height="200" />
+    
+    
+</symbol>
+
+<symbol id="sym-finger-pos" style="stroke: black;">
+    <desc>Finger position</desc>
+    <circle cx="14" cy="14" r="14" fill="#00f" />
+</symbol>
+
+
+
+<symbol id="open-pos" style="stroke: black;">
+    <desc>Finger position</desc>
+    <circle cx="10" cy="10" r="10" fill="none" />
+</symbol>
+
+<symbol id="muted-pos" style="stroke: black;">
+    <desc>Finger position</desc>
+    <line x1="0" y1="0" x2="20" y2="20" stroke-width="2"/>
+    <line x1="0" y1="20" x2="20" y2="0" stroke-width="2"/>
+</symbol>
+
+
+</defs>
+
+<use xlink:href="#sym-chart-1" x="40" y="40" width="160" height="200" />
+<use xlink:href="#sym-finger-pos" x="26" y="50" />
+<use xlink:href="#sym-finger-pos" x="56" y="50" />
+<use xlink:href="#sym-finger-pos" x="86" y="50" />
+
+<use xlink:href="#muted-pos" x="30" y="18" />
+<use xlink:href="#open-pos" x="60" y="18" />
+
+<text x="10" y="75" font-size="20">1</text>
+
+</svg>
+
+</body>
+</html>
+

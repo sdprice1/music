@@ -1,3 +1,4 @@
+
 project(
   'Music utils',
   'cpp',
@@ -22,6 +23,9 @@ lib_source = [
 	'GuitarString.cpp',
 	'GuitarChord.cpp',
 	'Guitar.cpp',
+	'Publisher.cpp',
+	'TextPublisher.cpp',
+	'HtmlPublisher.cpp',
 ]
 
 libname = 'music' 

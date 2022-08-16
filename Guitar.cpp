@@ -16,6 +16,7 @@
 //=============================================================================================================
 // INCLUDE
 //=============================================================================================================
+#include <set>
 #include "Guitar.h"
 
 //=============================================================================================================
@@ -186,6 +187,28 @@ std::cerr << "Valid " << validGuitarChords.size() << " chords" << std::endl ;
 
 	return validGuitarChords ;
 
+}
+
+
+//-------------------------------------------------------------------------------------------------------------
+std::vector<GuitarChord> Guitar::search(const Chord &chord, unsigned startFret, unsigned endFret,
+		const GuitarSearchCriteria& criteria) const
+{
+	std::set<GuitarChord> sortedChords ;
+	for (unsigned fret=startFret; fret <= endFret; fret++)
+	{
+		std::vector<GuitarChord> chords(search(chord, fret, criteria)) ;
+		for (auto gc : chords)
+		{
+			sortedChords.insert(gc) ;
+		}
+	}
+
+	std::vector<GuitarChord> chords ;
+	for (auto& gc : sortedChords)
+		chords.push_back(gc) ;
+
+	return chords ;
 }
 
 //=============================================================================================================

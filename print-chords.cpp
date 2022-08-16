@@ -32,6 +32,9 @@
 #include "GuitarChord.h"
 #include "Guitar.h"
 
+#include "TextPublisher.h"
+#include "HtmlPublisher.h"
+
 //=============================================================================================================
 // LOCAL
 //=============================================================================================================
@@ -165,12 +168,6 @@ int main(int argc, char** argv)
 	}
 	std::string noteName(options.args[0]) ;
 
-//	std::string type("Major") ;
-//	if (options.args.size() >= 2)
-//	{
-//		type = options.args[0] ;
-//	}
-
 	unsigned endFret(0) ;
 	if (options.wholeNeck)
 		endFret = 12 ;
@@ -189,65 +186,20 @@ int main(int argc, char** argv)
 	Guitar guitar ;
 
 	// generate chords
-	std::string title ;
-	std::set<GuitarChord> sortedChords ;
-	for (unsigned fret=0; fret <= endFret; fret++)
-	{
-		std::vector<GuitarChord> chords(guitar.search(*chord, fret, criteria)) ;
-		for (auto gc : chords)
-		{
-			sortedChords.insert(gc) ;
-			title = gc.title() ;
-		}
-	}
+	std::vector<GuitarChord> sortedChords( guitar.search(*chord, 0, endFret, criteria) ) ;
 
-	// display chords
-	std::cout << title << std::endl << std::endl ;
-	std::vector<std::string> lines ;
-	unsigned chordCount(0) ;
-	unsigned chordLineCount(0) ;
+	// print them
+//	std::shared_ptr<IPublisher> publisher(std::make_shared<TextPublisher>()) ;
+	std::shared_ptr<IPublisher> publisher(std::make_shared<HtmlPublisher>()) ;
+	publisher->begin() ;
 	for (auto gc : sortedChords)
 	{
-		std::stringstream ss ;
-		gc.show(ss, false) ;
-
-		std::vector<std::string> chordLines(StringUtils::splitStr(ss.str(), '\n')) ;
-		++chordCount ;
-		if (chordCount == 1)
-		{
-			lines = chordLines ;
-			continue ;
-		}
-
-		for (unsigned i=0; (i < chordLines.size()) && (i < lines.size()); ++i)
-			lines[i] += chordLines[i] ;
-
-		if (chordCount >= 4)
-		{
-			for (auto& line : lines)
-				std::cout << line << std::endl ;
-
-			std::cout << std::endl << std::endl ;
-
-			chordCount = 0 ;
-			lines.clear() ;
-
-			++chordLineCount ;
-
-			if (chordLineCount >= 5)
-			{
-				std::cout << "\f" ;
-				std::cout << title << std::endl << std::endl ;
-
-				chordLineCount = 0 ;
-			}
-		}
+		publisher->addChord(gc) ;
 	}
 
-	if (chordCount > 0)
-	{
-		for (auto& line : lines)
-			std::cout << line << std::endl ;
-	}
+//publisher->addChord(sortedChords[0]) ;
+	publisher->end() ;
+
+	std::cout << publisher->output() ;
 
 }

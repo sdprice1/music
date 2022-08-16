@@ -87,6 +87,13 @@ public:
 	std::vector<GuitarChord> triads() const ;
 
 	/**
+	 * Get the frets used for this chord, starting with the bass string
+	 * Fret 0 = open string
+	 * Fret -1 = not used
+	 */
+	std::vector<int> frets() const ;
+
+	/**
 	 * Comparison
 	 */
 	bool operator==(const GuitarChord& rhs) const ;
