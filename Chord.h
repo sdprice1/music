@@ -68,6 +68,11 @@ public:
 	std::vector<Note> notes() const ;
 
 	/**
+	 * Notes as a string
+	 */
+	std::string notesStr(const std::string& separator = "-") const ;
+
+	/**
 	 * Search for a note in the chord and return it.
 	 * (Used to ensure flats/sharps are displayed correctly)
 	 */

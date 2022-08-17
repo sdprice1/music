@@ -47,7 +47,7 @@ namespace {
 		unsigned debug ;
 		bool listTypes ;
 		bool pageBreaks ;
-		std::string type ;
+		std::vector<std::string> type ;
 		std::vector<std::string> args ;
 	};
 
@@ -78,7 +78,7 @@ namespace {
 		options.triadsOnly = false ;
 		options.listTypes = false ;
 		options.pageBreaks = false ;
-		options.type = "Major" ;
+		options.type.clear() ;
 		options.args.clear() ;
 
 		struct option long_options[] = {
@@ -96,6 +96,7 @@ namespace {
 		int c ;
 	    while ((c = getopt_long(argc, argv, "hd:wTlPt:", long_options, &option_index)) != -1)
 	    {
+	    	std::string optArgStr(optarg) ;
 	        switch (c)
 	        {
 	        case 'h':
@@ -124,7 +125,12 @@ namespace {
 	        	break ;
 
 	        case 't':
-	        	options.type = optarg ;
+	        	options.type.push_back(optarg) ;
+	        	if (optArgStr == "all")
+	        	{
+	        		options.type.clear() ;
+	        		options.type = Chord::types() ;
+	        	}
 	        	break ;
 	        }
 	    }
@@ -133,6 +139,9 @@ namespace {
 	    {
 	    	options.args.push_back(argv[optind++]) ;
 	    }
+
+	    if (options.type.empty())
+	    	options.type = std::vector<std::string>{"Major", "Minor"} ;
 
 		return true ;
 	}
@@ -166,7 +175,6 @@ int main(int argc, char** argv)
 		std::cerr << "Error: Must specify a note" << std::endl ;
 		return -1 ;
 	}
-	std::string noteName(options.args[0]) ;
 
 	unsigned endFret(0) ;
 	if (options.wholeNeck)
@@ -176,17 +184,27 @@ int main(int argc, char** argv)
 	if (options.triadsOnly)
 		criteria.onlyFindTriads = true ;
 
-	std::shared_ptr<Chord> chord(Chord::factory(options.type, noteName)) ;
-	if (!chord)
-	{
-		std::cerr << "ERROR: Unable to create " << options.type << " chord" << std::endl ;
-		return -1 ;
-	}
 
 	Guitar guitar ;
+	std::vector<GuitarChord> sortedChords ;
 
-	// generate chords
-	std::vector<GuitarChord> sortedChords( guitar.search(*chord, 0, endFret, criteria) ) ;
+	// process each note
+	for (auto& noteName : options.args)
+	{
+		for (auto& type : options.type)
+		{
+			std::shared_ptr<Chord> chord(Chord::factory(type, noteName)) ;
+			if (!chord)
+			{
+				std::cerr << "ERROR: Unable to create " << type << " chord" << std::endl ;
+				return -1 ;
+			}
+
+			// generate chords
+			std::vector<GuitarChord> chords( guitar.search(*chord, 0, endFret, criteria) ) ;
+			sortedChords.insert(sortedChords.end(), chords.begin(), chords.end()) ;
+		}
+	}
 
 	// print them
 //	std::shared_ptr<IPublisher> publisher(std::make_shared<TextPublisher>()) ;

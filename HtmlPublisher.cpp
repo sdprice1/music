@@ -24,6 +24,9 @@
 // CONSTANTS
 //=============================================================================================================
 
+// TODO: get this from Guitar
+const unsigned FRET_SPAN(4) ;
+
 //-------------------------------------------------------------------------------------------------------------
 const unsigned X_STRING_SPACE(30) ;
 const unsigned Y_FRET_SPACE(50) ;
@@ -49,8 +52,11 @@ HtmlPublisher::HtmlPublisher() :
 	Publisher(),
 	mWidth(0),
 	mHeight(0),
+	mTotalWidth(0),
+	mTotalHeight(0),
 	mRow(0),
-	mCol(0)
+	mCol(0),
+	mChord()
 {
 }
 
@@ -63,7 +69,10 @@ HtmlPublisher::~HtmlPublisher()
 bool HtmlPublisher::begin()
 {
 	mWidth = (5 * X_STRING_SPACE) ;
-	mHeight = (4 * Y_FRET_SPACE) ;
+	mHeight = ( FRET_SPAN * Y_FRET_SPACE) ;
+
+	mTotalWidth = mWidth + X_OFFSET ;
+	mTotalHeight = mHeight + Y_OFFSET + Y_FRET_SPACE ; // add extra space at bottom for fretted notes
 
 //	addOutput("<!DOCTYPE html>\n") ;
 //	addOutput("<html>\n<body>\n") ;
@@ -140,6 +149,8 @@ bool HtmlPublisher::begin()
 //-------------------------------------------------------------------------------------------------------------
 bool HtmlPublisher::addChord(const GuitarChord &chord)
 {
+	bool showTitle(chord.chord() != mChord) ;
+
 	int minFret(-1) ;
 	int maxFret(-1) ;
 	std::vector<int> frets(chord.frets()) ;
@@ -176,12 +187,39 @@ bool HtmlPublisher::addChord(const GuitarChord &chord)
 	if (minFret == 0)
 		minFret = 1 ;
 
-	std::cerr << "min fret=" << minFret << std::endl ;
-	std::cerr << "max fret=" << maxFret << std::endl ;
+//	std::cerr << "min fret=" << minFret << std::endl ;
+//	std::cerr << "max fret=" << maxFret << std::endl ;
+
+	if (showTitle)
+	{
+		if (mCol > 0)
+		{
+			mCol = 0 ;
+			++mRow ;
+		}
+
+		const unsigned TITLE_FONT(100) ;
+		const unsigned SUBTITLE_FONT(40) ;
+		unsigned tx( (mCol * mTotalWidth) + X_START) ;
+		unsigned ty( (mRow * mTotalHeight) + Y_START + TITLE_FONT - 35) ;
+
+		addOutput("<text x=\"" + std::to_string(tx) + "\" y=\"" + std::to_string(ty) + "\" font-size=\"" + std::to_string(TITLE_FONT) +
+				"\">" + chord.chord().name() + "</text>") ;
+
+		ty += SUBTITLE_FONT + 20 ;
+		addOutput("<text x=\"" + std::to_string(tx) + "\" y=\"" + std::to_string(ty) + "\" font-size=\"" + std::to_string(SUBTITLE_FONT) +
+				"\">" + chord.chord().notesStr() + "</text>") ;
+
+		ty += SUBTITLE_FONT + 15 ;
+		addOutput("<text x=\"" + std::to_string(tx) + "\" y=\"" + std::to_string(ty) + "\" font-size=\"" + std::to_string(SUBTITLE_FONT) +
+				"\" style=\"font-style: italic;\">[" + chord.chord().equation() + "]</text>") ;
+
+		++mRow ;
+	}
 
 	// draw guitar neck
-	unsigned x( (mCol * (mWidth + X_OFFSET)) + X_START) ;
-	unsigned y( (mRow * (mHeight + Y_OFFSET)) + Y_START) ;
+	unsigned x( (mCol * mTotalWidth) + X_START) ;
+	unsigned y( (mRow * mTotalHeight) + Y_START) ;
 
 	if (minFret <= 1)
 	{
@@ -203,7 +241,7 @@ bool HtmlPublisher::addChord(const GuitarChord &chord)
 	{
 		int fret(frets[string]) ;
 
-		std::cerr << "String " << string << " fret " << fret << std::endl ;
+//		std::cerr << "String " << string << " fret " << fret << std::endl ;
 
 		if (fret <= 0)
 		{
@@ -227,7 +265,7 @@ bool HtmlPublisher::addChord(const GuitarChord &chord)
 		unsigned posx( (x - FINGER_RADIUS) + (string * X_STRING_SPACE) ) ;
 		unsigned posy( (y + 12) + ( (fret - minFret) * Y_FRET_SPACE) ) ;
 
-		std::cerr << "String " << string << " fret " << fret << " (" << posx << ", " << posy << ")" << std::endl ;
+//		std::cerr << "String " << string << " fret " << fret << " (" << posx << ", " << posy << ")" << std::endl ;
 
 		// <use xlink:href=\"#sym-finger-pos\" x=\"26\" y=\"50\" />
 		addOutput("<use xlink:href=\"#sym-finger-pos\" x=\"" + std::to_string(posx) + "\" y=\"" + std::to_string(posy) + "\" />\n") ;
@@ -240,6 +278,7 @@ bool HtmlPublisher::addChord(const GuitarChord &chord)
 		++mRow ;
 	}
 
+	mChord = chord.chord() ;
 	return true ;
 }
 
@@ -250,8 +289,8 @@ bool HtmlPublisher::end()
 	addOutput("</body>\n</html>\n") ;
 
 
-	unsigned totalWidth( (CHORDS_PER_LINE * (mWidth + X_OFFSET)) + X_START) ;
-	unsigned totalHeight( (++mRow + Y_OFFSET) * mHeight + Y_START) ;
+	unsigned totalWidth( (CHORDS_PER_LINE * mTotalWidth) + X_START) ;
+	unsigned totalHeight( ++mRow * mTotalHeight + Y_START) ;
 
 	// insert at start of string (needs to be in reverse order)
 	insertOutput("<title>Guitar Chords</title>\n") ;

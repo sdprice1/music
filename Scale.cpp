@@ -57,6 +57,15 @@ Scale::Scale(const std::string &name, const Note& root, const std::string &inter
 }
 
 //-------------------------------------------------------------------------------------------------------------
+Scale::Scale() :
+	mName(),
+	mRootNote(),
+	mIntervals(),
+	mNotes()
+{
+}
+
+//-------------------------------------------------------------------------------------------------------------
 Scale::~Scale()
 {
 }
@@ -78,5 +87,4 @@ std::vector<Note> Scale::notes() const
 {
 	return mNotes ;
 }
-
 

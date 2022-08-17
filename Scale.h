@@ -32,6 +32,8 @@ public:
 	Scale(const std::string& name, const Note& root, const std::string& intervals) ;
 	virtual ~Scale() ;
 
+	Scale() ;
+
 	/**
 	 * Scale name
 	 */

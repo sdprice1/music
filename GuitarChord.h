@@ -94,6 +94,11 @@ public:
 	std::vector<int> frets() const ;
 
 	/**
+	 * Get the underlying chord that this implements
+	 */
+	Chord chord() const ;
+
+	/**
 	 * Comparison
 	 */
 	bool operator==(const GuitarChord& rhs) const ;

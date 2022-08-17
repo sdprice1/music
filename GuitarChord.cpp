@@ -146,15 +146,7 @@ bool GuitarChord::isValid() const
 //-------------------------------------------------------------------------------------------------------------
 std::string GuitarChord::title() const
 {
-	std::string notesStr ;
-	for (auto& note : mChord.notes())
-	{
-		if (!notesStr.empty())
-			notesStr += '-' ;
-		notesStr += note.toString() ;
-	}
-
-	std::string titleStr = mChord.name() + " (" + notesStr + ") [" +
+	std::string titleStr = mChord.name() + " (" + mChord.notesStr() + ") [" +
 			mChord.equation() + "]" ;
 
 	return titleStr ;
@@ -278,6 +270,7 @@ void GuitarChord::show(std::ostream &os, bool showTitle) const
 
 }
 
+//-------------------------------------------------------------------------------------------------------------
 std::vector<int> GuitarChord::frets() const
 {
 	std::vector<int> list ;
@@ -288,6 +281,13 @@ std::vector<int> GuitarChord::frets() const
 	}
 	return list ;
 }
+
+//-------------------------------------------------------------------------------------------------------------
+Chord GuitarChord::chord() const
+{
+	return mChord ;
+}
+
 
 //-------------------------------------------------------------------------------------------------------------
 bool GuitarChord::operator ==(const GuitarChord &rhs) const

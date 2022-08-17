@@ -56,6 +56,16 @@ Chord::Chord(const std::string &name, const Scale &scale, const std::string &equ
 	initNotes() ;
 }
 
+//-------------------------------------------------------------------------------------------------------------
+Chord::Chord() :
+	mName(),
+	mScale(),
+	mEquation(),
+	mEquationNotes(),
+	mNotes()
+{
+}
+
 
 //-------------------------------------------------------------------------------------------------------------
 Chord::~Chord()
@@ -85,6 +95,19 @@ std::string Chord::equation() const
 std::vector<Note> Chord::notes() const
 {
 	return mNotes ;
+}
+
+//-------------------------------------------------------------------------------------------------------------
+std::string Chord::notesStr(const std::string &separator) const
+{
+	std::string notesStr ;
+	for (auto& note : mNotes)
+	{
+		if (!notesStr.empty())
+			notesStr += separator ;
+		notesStr += note.toString() ;
+	}
+	return notesStr ;
 }
 
 //-------------------------------------------------------------------------------------------------------------

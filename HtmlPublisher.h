@@ -16,6 +16,8 @@
 #ifndef HTMLPUBLISHER_H_
 #define HTMLPUBLISHER_H_
 
+#include <memory>
+#include "Chord.h"
 #include "Publisher.h"
 
 /*!
@@ -48,9 +50,11 @@ public:
 private:
 	unsigned mWidth ;
 	unsigned mHeight ;
+	unsigned mTotalWidth ;
+	unsigned mTotalHeight ;
 	unsigned mRow ;
 	unsigned mCol ;
-
+	Chord mChord ;
 } ;
 
 
