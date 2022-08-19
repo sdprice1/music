@@ -139,6 +139,9 @@ namespace {
 	    {
 	    	options.args.push_back(argv[optind++]) ;
 	    }
+	    if (options.args.empty())
+	    	options.args = std::vector<std::string>{"A", "B", "C", "D", "E", "F", "G"} ;
+
 
 	    if (options.type.empty())
 	    	options.type = std::vector<std::string>{"Major", "Minor"} ;

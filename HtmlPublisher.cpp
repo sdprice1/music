@@ -41,7 +41,7 @@ const unsigned FINGER_RADIUS(14) ;
 const unsigned MUTED_SIZE(20) ;
 const unsigned OPEN_SIZE(MUTED_SIZE) ;
 
-const unsigned CHORDS_PER_LINE(6) ;
+const unsigned CHORDS_PER_LINE(4) ;
 
 //=============================================================================================================
 // PUBLIC
@@ -149,8 +149,15 @@ bool HtmlPublisher::begin()
 //-------------------------------------------------------------------------------------------------------------
 bool HtmlPublisher::addChord(const GuitarChord &chord)
 {
+
+//std::cerr << "-- Add chord ----" << std::endl ;
+
 	bool showTitle(chord.chord() != mChord) ;
 
+	// save the last drawn chord
+	mChord = chord.chord() ;
+
+	// get min/max frets
 	int minFret(-1) ;
 	int maxFret(-1) ;
 	std::vector<int> frets(chord.frets()) ;
@@ -190,6 +197,7 @@ bool HtmlPublisher::addChord(const GuitarChord &chord)
 //	std::cerr << "min fret=" << minFret << std::endl ;
 //	std::cerr << "max fret=" << maxFret << std::endl ;
 
+	// show the title when chord changes
 	if (showTitle)
 	{
 		if (mCol > 0)
@@ -237,12 +245,28 @@ bool HtmlPublisher::addChord(const GuitarChord &chord)
 	}
 
 	// show finger positions
+	std::vector<Note> notes(chord.notes()) ;
 	for (unsigned string=0; string < frets.size(); ++string)
 	{
 		int fret(frets[string]) ;
 
 //		std::cerr << "String " << string << " fret " << fret << std::endl ;
 
+
+		// Display the note at this string
+		if (fret >= 0)
+		{
+			const unsigned NOTES_SIZE(20) ;
+			unsigned notex( x + (string * X_STRING_SPACE)) ;
+			unsigned notey( y + mHeight + NOTES_SIZE ) ;
+			addOutput("<text x=\"" + std::to_string(notex) +
+					"\" y=\"" + std::to_string(notey) +
+					"\" font-size=\"" + std::to_string(NOTES_SIZE) +
+					"\" style=\"text-anchor: middle;\">" +
+					mChord.search(notes[string]).toString() + "</text>") ;
+		}
+
+		// if we're doing the open/muted strings then display them
 		if (fret <= 0)
 		{
 			unsigned posx( x - (MUTED_SIZE/2) + (string * X_STRING_SPACE) ) ;
@@ -270,15 +294,21 @@ bool HtmlPublisher::addChord(const GuitarChord &chord)
 		// <use xlink:href=\"#sym-finger-pos\" x=\"26\" y=\"50\" />
 		addOutput("<use xlink:href=\"#sym-finger-pos\" x=\"" + std::to_string(posx) + "\" y=\"" + std::to_string(posy) + "\" />\n") ;
 
+
+
 	}
 
+std::cerr << chord.chord().name() << " row=" << mRow << " y=" << y << " y+totalHeight=" << (y+mTotalHeight) << std::endl ;
+
+
+
+	// update position
 	if (++mCol >= CHORDS_PER_LINE)
 	{
 		mCol = 0 ;
 		++mRow ;
 	}
 
-	mChord = chord.chord() ;
 	return true ;
 }
 

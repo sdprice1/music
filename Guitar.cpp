@@ -135,7 +135,7 @@ std::cerr << "Found " << guitarChords.size() << " chords" << std::endl ;
 	{
 #ifdef DEBUG_CHORD_SEARCH
 std::cerr << "Found chord:" << std::endl ;
-gc.show() ;
+gc.show(std::cerr) ;
 std::cerr << "==" << std::endl ;
 #endif
 

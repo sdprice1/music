@@ -94,6 +94,11 @@ public:
 	std::vector<int> frets() const ;
 
 	/**
+	 * Get the notes used for this chord, starting with the bass string
+	 */
+	std::vector<Note> notes() const ;
+
+	/**
 	 * Get the underlying chord that this implements
 	 */
 	Chord chord() const ;

@@ -283,6 +283,20 @@ std::vector<int> GuitarChord::frets() const
 }
 
 //-------------------------------------------------------------------------------------------------------------
+std::vector<Note> GuitarChord::notes() const
+{
+	std::vector<Note> list ;
+
+	for (auto string : STRINGS)
+	{
+		list.push_back(mNotes.at(string)) ;
+	}
+	return list ;
+}
+
+
+
+//-------------------------------------------------------------------------------------------------------------
 Chord GuitarChord::chord() const
 {
 	return mChord ;
