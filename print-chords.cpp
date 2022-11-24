@@ -59,7 +59,7 @@ namespace {
 
 	void help()
 	{
-		std::cout << "print-chords" << std::endl ;
+		std::cout << "print-chords [options] [notes..]" << std::endl ;
 		std::cout << "Options" << std::endl ;
 		std::cout << "  -h, --help                 Show this help " << std::endl ;
 		std::cout << "  -d, --debug <level>        Set debug level " << std::endl ;
@@ -68,6 +68,7 @@ namespace {
 		std::cout << "  -t, --type <type>          Select chord type (default: Major)" << std::endl ;
 		std::cout << "  -l, --list-types           List available chord types" << std::endl ;
 		std::cout << "  -P, --page-breaks          Add page breaks for printing" << std::endl ;
+		std::cout << "If no notes are specified then prints chords for the main 7." << std::endl ;
 		std::cout << std::endl ;
 	}
 
@@ -96,7 +97,10 @@ namespace {
 		int c ;
 	    while ((c = getopt_long(argc, argv, "hd:wTlPt:", long_options, &option_index)) != -1)
 	    {
-	    	std::string optArgStr(optarg) ;
+	    	std::string optArgStr ;
+	    	if (optarg)
+	    		optArgStr = std::string(optarg) ;
+
 	        switch (c)
 	        {
 	        case 'h':
